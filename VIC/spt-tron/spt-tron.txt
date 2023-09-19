@@ -1,0 +1,221 @@
+   10 rem tron - spt double joy
+   20 rem jlp 2023
+   30 gosub 1800:rem init vars
+   40 gosub 1950:rem init game state
+   50 gosub 1600:rem title screen
+   60 gosub 1700:rem setup game screen
+   99 :
+  100 rem main
+  110 gosub1000:rem check joys
+  115 gosub2220:rem alt engine sound
+  120 gosub1100:rem check kbd
+  130 gosub1400:rem update positions
+  135 rem gosub2220:rem alt engine sound
+  140 gosub1300:rem check collisions
+  150 gosub1450:rem game state
+  160 gosub1500:rem update screen
+  170 rem gosub2220:rem alt engine sound
+  180 ifge then ge=0:goto40:rem new game
+  998 goto 110
+  999 :
+ 1000 rem read dual joys
+ 1005 pv=peek(db):rem port val
+ 1010 i1=.:i2=.:f1=.:f2=.
+ 1015 if int(pvand3)=0 then f1=1:goto1040:rem fire
+ 1020 if not pvand4 then i1=-1:rem l
+ 1025 if not pvand8 then i1=1:rem r
+ 1030 if not pvand1 then i1=-40:rem u
+ 1035 if not pvand2 then i1=40:rem d
+ 1040 if int(pvand48)=0 then f2=1:goto1065:rem fire
+ 1045 if not pvand64 then i2=-1:rem l
+ 1050 if not pvand128 then i2=1:rem r
+ 1055 if not pvand16 then i2=-40:rem u
+ 1060 if not pvand32 then i2=40:rem d
+ 1065 return
+ 1069 :
+ 1100 rem read keybd
+ 1198 return
+ 1199 :
+ 1200 rem new round
+ 1205 gosub1900:rem display score
+ 1210 sl=len(tp$)-1
+ 1215 sx=(40-sl)/2:sy=12
+ 1220 gosub2020:rem pprint
+ 1225 gosub2100:rem await input
+ 1230 rem re-init pos
+ 1235 gosub1950:rem init game state
+ 1240 gosub1700:rem refresh game screen
+ 1248 return
+ 1249 :
+ 1250 rem new game
+ 1255 gosub1900:rem display score
+ 1260 sl=len(tp$)-1
+ 1265 sx=(40-sl)/2:sy=12
+ 1270 gosub2020:rem pprint
+ 1275 gosub2100:rem await input
+ 1280 gosub1950:rem init game state
+ 1285 s1=.:s2=.:rem init scores
+ 1298 return
+ 1299 :
+ 1300 rem check collision
+ 1301 rem x1, x2, y1, y2 - coords
+ 1305 c1=.:c2=.
+ 1310 if tc or f1 then if peek(sc+x1+y1)<>32 then c1=1
+ 1315 if tc or f2 then if peek(sc+x2+y2)<>32 then c2=1
+ 1320 return
+ 1329 :
+ 1400 rem update positions
+ 1401 rem x1,x2,y1,y2 cords
+ 1402 rem d1,d2,d3,d4 headings
+ 1403 rem f1, f2 - fire
+ 1404 rem o1, o2, o3, o4 - old pos
+ 1405 rem check if move avail
+ 1406 tc=tc+1:if tc>1 then tc=0
+ 1407 :
+ 1409 if tc then 1418:rem normal move
+ 1410 if f1 then 1420:rem turbo move
+ 1413 goto1427:rem skip move
+ 1415 rem save old heading, set new
+ 1418 if i1andi1<>-d1 then d3=d1:d1=i1
+ 1420 o2=o1:o1=sc+x1+y1:rem trail
+ 1423 if abs(d1)=1 then x1=x1+d1
+ 1425 if abs(d1)=40 then y1=y1+d1
+ 1426 :
+ 1427 if tc then 1432:rem normal move
+ 1428 if f2 then 1435:rem turbo move
+ 1429 goto1448:rem skip move
+ 1430 rem save old heading, set new
+ 1432 if i2andi2<>-d2 then d4=d2:d2=i2
+ 1435 o4=o3:o3=sc+x2+y2:rem trail
+ 1440 if abs(d2)=1 then x2=x2+d2
+ 1445 if abs(d2)=40 then y2=y2+d2
+ 1448 return
+ 1449 :
+ 1450 rem game state
+ 1452 if c1 or c2 then gosub2260:gosub2250:rem crash and stop sound
+ 1455 if c1=1 and c2=1 then tp$="both crashed - redo":gosub1200
+ 1460 if c1=1 then s2=s2+1:if s2<sw then tp$="p1 crashed":gosub1200
+ 1465 if c2=1 then s1=s1+1:if s1<sw then tp$="p2 crashed":gosub1200
+ 1470 if s1>=sw then tp$="player 1 wins":gosub1250:ge=1
+ 1475 if s2>=sw then tp$="player 2 wins":gosub1250:ge=1
+ 1498 return
+ 1499 :
+ 1500 rem update screen
+ 1501 rem x1,x2,y1,y2 :rem coords
+ 1502 :
+ 1505 rem p1 bike & trail
+ 1510 pokesc+x1+y1,90:pokeo2,160
+ 1515 rem p2 bike & trail
+ 1520 pokesc+x2+y2,81:pokeo4,102
+ 1525 return
+ 1530 :
+ 1600 rem show title
+ 1605 print"{clr}{rvon}                                        {rvof}";
+ 1610 fori=.to22:print"{rvon} {rvof}                                      {rvon} {rvof}";:next
+ 1615 print"{rvon}                                       {rvof}";
+ 1618 pokesc+999,160:rem no scroll
+ 1620 rem show message
+ 1622 dl=0 :rem text delay
+ 1625 so=64:rem  poke char offset
+ 1630 tp$="greetings programs":sy=3:gosub2050
+ 1631 tp$="U{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}I":sy=5:gosub2020
+ 1632 tp$="{SHIFT--}light cycle duel{SHIFT--}":sy=6:gosub2020
+ 1633 tp$="J{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}K":sy=7:gosub2020
+ 1635 tp$="first player to score five wins":sy=9:gosub2050
+ 1640 tp$="player 1       player 2":sy=12:gosub2020
+ 1650 tp$="ZZ             QQ":sy=14:gosub2020
+ 1655 tp$="use spt dual joysticks":sy=16:gosub2020
+ 1660 tp$="or             or":sy=18:gosub2020
+ 1670 tp$="wasd+spc       8456+rsh":sy=19:gosub2020
+ 1680 tp$="press fire to begin":sy=21:gosub2050
+ 1690 gosub2100:rem cycle & wait
+ 1698 return
+ 1699 :
+ 1700 rem setup game screen
+ 1705 print"{clr} player 1:                    :player 2"
+ 1710 print"{home}{down}{CBM-A}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{CBM-S}";
+ 1715 fori=.to21:print"{SHIFT--}                                      {SHIFT--}";:next
+ 1720 print"{CBM-Z}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}{SHIFT-*}";
+ 1725 pokesc+999,125:rem no scroll
+ 1730 gosub1900:rem display score
+ 1735 gosub2200:rem init sound
+ 1798 return
+ 1799 :
+ 1800 rem init vars
+ 1810 ge=.:s1=.:s2=.
+ 1815 sx=.:sy=.:so=64
+ 1820 sc=32768:dl=5:dim gd(100)
+ 1825 db=59471:rv=peek(57344)
+ 1830 sr=59467:sv=59466:sf=59464
+ 1835 sp=255:se(0)=15:se(1)=51:se(2)=85
+ 1840 i=.:j=.:sw=5:ls=.:le=.:pv=.
+ 1845 dim cd(2):cd(0)=42:cd(1)=87:cd(2)=81
+ 1850 sd$="{home}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}"
+ 1860 return
+ 1899 :
+ 1900 rem update score disp
+ 1905 pokesc+11,s1+176:pokesc+28,s2+176
+ 1948 return
+ 1949 :
+ 1950 rem init game state
+ 1955 x1=5:y1=40*12:x2=34:y2=40*12
+ 1960 o1=.:o2=.:o3=.:o4=.
+ 1965 d1=1:d2=-1:d3=.:d4=.:c1=.:c2=.
+ 1970 i1=.:i2=.:f1=.:f2=.:tc=.
+ 1998 return
+ 1999 :
+ 2000 rem delay function
+ 2005 forj=.to dl:next
+ 2010 return
+ 2015 :
+ 2020 rem print positioned string
+ 2025 sx=(40-len(tp$))/2
+ 2030 printleft$(sd$,sy+1);spc(sx);tp$;
+ 2040 return
+ 2045 :
+ 2050 rem poke positioned string
+ 2052 sl=len(tp$)-1
+ 2053 sx=(40-len(tp$)-1)/2:rem center
+ 2055 fori=.tosl:gosub2000:pokesc+i+40*sy+sx+1,asc(mid$(tp$,i+1,1))+so:next
+ 2090 return
+ 2095 :
+ 2100 rem cycle text/await input
+ 2105 rem sx, sy, sl - coords & len
+ 2108 sl=len(tp$)-1
+ 2110 fori=.tosl:gd(i)=peek(sc+sx+40*sy+i):next
+ 2115 ls=.:le=sl:j=1
+ 2120 for i=ls to le step j
+ 2125 if gd(i)>127 then pokesc+sx+40*sy+i,gd(i)-128
+ 2130 if gd(i)<128 then pokesc+sx+40*sy+i,gd(i)+128
+ 2135 if i<>ls then pokesc+sx+40*sy+i-j,gd(i-j)
+ 2140 pv=peek(db)
+ 2145 if not pv and 3 then 2185
+ 2150 if not pv and 48 then 2185
+ 2155 next
+ 2160 i=ls:ls=le:le=i:j=-j
+ 2165 goto 2120
+ 2185 fori=.to.:nexti:rem clean stack
+ 2190 return
+ 2195 :
+ 2200 rem init engine sound
+ 2205 pokesr,16:rem enable sound
+ 2210 pokesv,se(0):rem octave
+ 2215 sp=200:rem pitch
+ 2219 :
+ 2220 rem alt engine sound
+ 2225 if sp=200 then sp=205:goto2240
+ 2230 if sp=205 then sp=200
+ 2240 pokesf,sp:rem pitch
+ 2245 return
+ 2249 :
+ 2250 rem sound stop
+ 2255 pokesr,0:return
+ 2259 :
+ 2260 rem crash effect
+ 2265 j=.:for i=160 to 127 step-1
+ 2270 if c1=1 then pokesc+x1+y1,cd(j)
+ 2275 if c2=1 then pokesc+x2+y2,cd(j)
+ 2280 j=j+1:if j>2 then j=0
+ 2285 pokesf,i:next
+ 2290 return
+ 2299 :
