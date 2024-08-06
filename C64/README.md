@@ -6,12 +6,6 @@ Jess's 80'S BASIC GAMES:
 BOUNCY BALL
 My first attempt at what could be called a game. Uses joystick in port 2. Try to place blocks in the ball's path to score points.
 
-FALCON
-Unfinished vertically scrolling shooter.  Uses joystick in port 2.
-
-PHOENIX
-Unfinished, naive attempt at writing a text adventure.
-
 LOST MAZE
 Text adventure/maze game. Complete.
 
